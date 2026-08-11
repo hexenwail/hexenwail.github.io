@@ -5,88 +5,302 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hexenwail — a modern Hexen II engine</title>
 <meta name="description" content="Hexenwail is a GL 4.3 modernization of the Hexen II engine, built on SDL3 + OpenGL for 64-bit Linux and Windows.">
+<link rel="canonical" href="https://hexenwail.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hexenwail — a modern Hexen II engine">
+<meta property="og:description" content="A GL 4.3 modernization of the Hexen II engine — SDL3 + OpenGL, for 64-bit Linux and Windows.">
+<meta property="og:url" content="https://hexenwail.github.io/">
+<meta property="og:image" content="https://hexenwail.github.io/screenshot.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; min-height: 100vh;
-    font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    color: #d8cdb8; background: #14110d;
-    background-image: radial-gradient(circle at 50% -10%, #2a2114 0%, #14110d 60%);
-    display: flex; flex-direction: column; align-items: center;
+  :root {
+    color-scheme: dark;
+    --bg: #2a2d40;
+    --bg-side: #232636;
+    --bg-2: #33374d;
+    --ink: #f0f1f6;
+    --ink-2: #b8bdd0;
+    --ink-3: #9aa0b8;
+    --rule: #4a4f6b;
+    --gold: #d8c48a;
+    --link: #e8eaf4;
+    --link-hover: #f2e2b0;
+    --serif: Georgia, "Times New Roman", Times, serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --side: clamp(11rem, 20%, 14rem);
+    --wrap: 62rem;
+    --measure: 66ch;
   }
-  main { max-width: 720px; padding: 4rem 1.5rem; }
-  h1 { font-size: 2.6rem; margin: 0 0 .25rem; color: #e8b25a; letter-spacing: .5px; }
-  .tag { color: #9c8f74; margin: 0 0 2rem; font-size: 1.1rem; }
-  h2 { color: #e8b25a; font-size: 1.15rem; margin: 2.5rem 0 .75rem; border-bottom: 1px solid #3a2f1d; padding-bottom: .3rem; }
-  a { color: #d99a45; }
-  a:hover { color: #f0b75e; }
-  ul { padding-left: 1.2rem; }
-  .cta { display: inline-block; margin: .4rem .6rem .4rem 0; padding: .6rem 1.1rem;
-         background: #3a2f1d; border: 1px solid #5a4a2d; border-radius: 6px;
-         color: #f0e0c0; text-decoration: none; font-weight: 600; }
-  .cta:hover { background: #4a3c25; }
-  .cta.play { background: #e8b25a; border-color: #f0c87a; color: #1a1610; }
-  .cta.play:hover { background: #f0c87a; }
-  .playnote { color: #9c8f74; font-size: .9rem; margin: .1rem 0 0; }
-  code { background: #221c12; padding: .15rem .4rem; border-radius: 4px; color: #e8b25a; }
-  footer { color: #6f6450; font-size: .85rem; margin-top: 3rem; }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 1.05rem/1.6 var(--serif); }
+  a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+  a:hover { color: var(--link-hover); }
+  a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .skip { position: absolute; left: -9999px; background: var(--gold); color: #1a1c28; padding: .6rem 1rem; z-index: 100; text-decoration: none; }
+  .skip:focus { left: 1rem; top: 1rem; }
+
+  .frameset { display: flex; align-items: flex-start; min-height: 100vh; }
+  .sidebar { flex: 0 0 var(--side); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 1.6rem 1rem 2rem; background: var(--bg-side); border-right: 1px solid var(--rule); text-align: center; }
+  .content { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
+  .content > main { flex: 1 0 auto; }
+  .wrap { width: 100%; max-width: var(--wrap); padding: 0 2rem; }
+  main .wrap { padding-block: 1.5rem 2rem; }
+
+  .brand { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; color: inherit; text-decoration: none; }
+  .brand:hover { color: var(--link-hover); }
+  .brand-logo { display: block; max-width: 100%; height: auto; }
+  .brand-text strong { display: block; font-weight: 700; font-size: 1.05rem; line-height: 1.25; }
+  .brand-text em { display: block; margin-top: .4rem; color: var(--ink-2); font-size: .82rem; line-height: 1.35; }
+
+  .nav { margin-top: 1.7rem; }
+  .nav ul { list-style: none; margin: 0; padding: 0; }
+  .nav li { margin: .3rem 0; color: var(--ink-2); }
+  .nav li::before { content: "[ "; }
+  .nav li::after { content: " ]"; }
+  .nav a { font-style: italic; }
+
+  h1, h2, h3, h4 { font-family: var(--serif); font-weight: 700; line-height: 1.25; }
+  .doc { padding-bottom: 2.5rem; }
+  .doc-head { margin: 0 0 1.4rem; padding-bottom: .5rem; border-bottom: 1px solid var(--rule); }
+  .doc-head h1 { font-size: 1.85rem; margin: 0 0 .3rem; color: var(--ink); }
+  .tag, .lede, .playnote { color: var(--ink-2); margin: .3rem 0; max-width: var(--measure); }
+  .playnote { font-size: .92rem; }
+  .prose { max-width: var(--measure); }
+  .prose > * + * { margin-top: 1.05em; }
+  .prose h2 { font-size: 1.4rem; margin-top: 2rem; margin-bottom: .3rem; padding-bottom: .25rem; border-bottom: 1px solid var(--rule); }
+  .prose h3 { font-size: 1.15rem; margin-top: 1.6rem; margin-bottom: .1rem; color: var(--ink); }
+  .prose p { margin-bottom: 0; }
+  .prose ul { padding-left: 1.5rem; }
+  .prose li + li { margin-top: .25rem; }
+  code { font-family: var(--mono); font-size: .88em; background: var(--bg-2); color: var(--ink); padding: .1em .35em; }
+
+  .cta-row { margin-block: 1.2rem 1.6rem; }
+  .cta { display: inline; padding: 0; margin-right: .9rem; background: none; border: 0; border-radius: 0; color: var(--link); font: inherit; font-weight: 400; text-decoration: underline; }
+  .cta:hover { color: var(--link-hover); }
+  .cta.play { color: var(--gold); font-weight: 700; }
+
+  figure { margin: 1.4rem 0; max-width: var(--measure); }
+  figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); }
+  figcaption { color: var(--ink-2); font-size: .88rem; margin-top: .3rem; }
+
+  .grid { display: block; }
+  .grid > div { padding: .8rem 0; border-bottom: 1px solid var(--rule); }
+  .grid h3 { margin-top: 0; font-style: italic; }
+  .lineage { border: 1px solid var(--rule); padding: .8rem 1rem; max-width: var(--measure); color: var(--ink-2); }
+  .lineage strong { color: var(--ink); }
+  .lineage .now { color: var(--gold); }
+
+  .site-foot { flex: none; border-top: 1px solid var(--rule); margin-top: 2.5rem; font-size: .92rem; }
+  .site-foot .wrap { padding-block: 1.4rem 2rem; }
+  .site-foot p { margin: 0 0 .5rem; max-width: 78ch; color: var(--ink-2); }
+
+  @media (max-width: 52rem) {
+    .frameset { display: block; }
+    .sidebar { position: static; height: auto; overflow: visible; flex: none; width: 100%; padding: 1rem 1.5rem 1.1rem; border-right: 0; border-bottom: 1px solid var(--rule); }
+    .brand { flex-direction: row; justify-content: center; align-items: center; gap: .6rem; text-align: left; }
+    .brand-logo { width: 120px; height: auto; }
+    .brand-text em { display: none; }
+    .nav { margin-top: .9rem; }
+    .nav ul { display: flex; flex-wrap: wrap; justify-content: center; gap: .1rem .8rem; }
+    .nav li { margin: 0; }
+    .content { min-height: 0; }
+    .wrap { padding-inline: 1.5rem; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <h1>Hexenwail</h1>
-  <p class="tag">A GL 4.3 modernization of the Hexen II engine — SDL3 + OpenGL.</p>
+<a class="skip" href="#main">Skip to content</a>
+<div class="frameset">
+  <aside class="sidebar" aria-label="Site navigation">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="hex2logo.jpg" width="166" height="58" alt="Hexen II">
+      <span class="brand-text">
+        <strong>Hexenwail</strong>
+        <em>A modern Hexen II engine</em>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      <ul>
+        <li><a href="https://hexenwail.github.io/hexenwail/">Play</a></li>
+        <li><a href="https://github.com/hexenwail/hexenwail/releases/latest">Download</a></li>
+        <li><a href="https://github.com/hexenwail/hexenwail">Source</a></li>
+        <li><a href="https://github.com/hexenwail/hexenwail/issues">Bugs</a></li>
+        <li><a href="https://hexenworld.org/">Community</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <div class="content">
+    <main id="main">
+      <div class="wrap doc prose">
+        <header class="doc-head">
+          <h1>Hexenwail</h1>
+          <p class="tag">A GL 4.3 modernization of the Hexen II engine — SDL3 + OpenGL.</p>
+        </header>
 
-  <p>
-    Just as <a href="https://github.com/andrei-drexler/ironwail">Ironwail</a> modernized
-    QuakeSpasm's renderer, Hexenwail does the same for Hexen II. It descends from Raven
-    Software's 2000 source release by way of
-    <a href="http://uhexen2.sourceforge.net/">Hammer of Thyrion</a> and
-    <a href="https://github.com/shanjaq/uhexen2">uHexen2</a>, rebuilt around a modern
-    SDL3 + OpenGL&nbsp;4.3 pipeline for 64-bit Linux and Windows.
-  </p>
+        <p>
+          Just as <a href="https://github.com/andrei-drexler/ironwail">Ironwail</a> took
+          <a href="https://github.com/sezero/quakespasm">QuakeSpasm</a> and modernized its renderer,
+          Hexenwail does the same for Hexen&nbsp;II. It descends from Raven Software's 2000 source
+          release by way of <a href="https://github.com/sezero/uhexen2">Hammer of Thyrion / uHexen2</a>,
+          rebuilt around a modern SDL3 + OpenGL&nbsp;4.3 pipeline for 64-bit Linux and Windows.
+        </p>
 
-  <p>
-    <a class="cta play" href="https://hexenwail.github.io/hexenwail/">&#9654;&nbsp; Play in your browser</a>
-    <a class="cta" href="https://github.com/hexenwail/hexenwail/releases">Download</a>
-    <a class="cta" href="https://github.com/hexenwail/hexenwail">Source on GitHub</a>
-    <a class="cta" href="https://github.com/hexenwail/hexenwail/issues">Report a Bug</a>
-  </p>
-  <p class="playnote">
-    Nothing to install — the browser launcher fetches Raven's free 1997 three-level
-    demo, or imports your own <code>data1</code>. Plays offline after the first load.
-  </p>
+        <p class="cta-row">
+          <a class="cta play" href="https://hexenwail.github.io/hexenwail/">&#9654;&nbsp; Play in your browser</a>
+          <a class="cta" href="https://github.com/hexenwail/hexenwail/releases/latest">Download</a>
+          <a class="cta" href="https://github.com/hexenwail/hexenwail">Source on GitHub</a>
+          <a class="cta" href="https://github.com/hexenwail/hexenwail/issues">Report a Bug</a>
+        </p>
+        <p class="playnote">
+          Nothing to install — the browser launcher fetches Raven's free 1997 three-level
+          demo, or imports your own <code>data1</code>. Plays offline after the first load.
+        </p>
 
-  <h2>Which version should I use?</h2>
-  <p>Three living branches of the Hexen II engine, depending on what you want to play:</p>
-  <ul>
-    <li><strong>Vanilla &amp; upstream</strong> — <a href="https://github.com/sezero/uhexen2">Hammer of Thyrion / uHexen2</a> (sezero's <code>main</code>): the reference engine, most faithful to the original.</li>
-    <li><strong>Classic community mods</strong> — <a href="https://github.com/shanjaq/uhexen2">Shanjaq's fork</a> through its final <code>uhexen2-r6303.zip</code>, the build many mods in the <a href="https://discord.com/channels/557756282430554112">Hexen II Discord</a> target.</li>
-    <li><strong>Steam Deck &amp; modern systems</strong> — Hexenwail (this project): a GL 4.3 / SDL3 modernization with gamepad support, render scaling, and Flatpak packaging.</li>
-  </ul>
+        <figure>
+          <img src="screenshot.jpg" width="1600" height="900" alt="A Hexen II necromancer facing a giant spider in a torchlit stone chamber, rendered by Hexenwail." loading="lazy">
+          <figcaption>
+            New worlds await —
+            <a href="https://www.moddb.com/mods/wheel-of-karma-a-tulku-odyssey">Wheel of Karma</a>, by Inky.
+          </figcaption>
+        </figure>
 
-  <h2>Requirements</h2>
-  <p>
-    Hexenwail ships <em>no</em> game assets. A valid copy of Hexen II is required — available
-    from <a href="https://www.gog.com/en/game/hexen_ii">GOG</a>. You need
-    <code>data1/pak0.pak</code> and <code>data1/pak1.pak</code>; add
-    <code>portals/pak3.pak</code> for Portal of Praevus. To just try it, the
-    <a href="https://hexenwail.github.io/hexenwail/">browser build</a> can load the free
-    1997 demo instead, and the desktop releases ship a fetch helper for the same data.
-  </p>
+        <h2>Which version should I use?</h2>
+        <p>Three living branches of the Hexen II engine, depending on what you want to play:</p>
+        <ul>
+          <li><strong>Vanilla &amp; upstream maintenance</strong> —
+            <a href="https://github.com/sezero/uhexen2">Hammer of Thyrion / uHexen2</a>, sezero's
+            <code>master</code> branch. The reference cross-platform engine: most faithful to the
+            original release, and the best base for general play and ongoing portability work.</li>
+          <li><strong>Classic community mods (Shanjaq era)</strong> —
+            <a href="https://github.com/shanjaq/uhexen2">Shanjaq's fork</a> through its final
+            <code>uhexen2-r6303.zip</code> build. Many mods in the active
+            <a href="https://discord.gg/nC848XavDQ">Hexen II Discord</a> were built and tested against
+            this engine, so it remains the safest choice for that catalog of content.</li>
+          <li><strong>Steam Deck &amp; modern systems</strong> — Hexenwail (this project). A GL 4.3 /
+            SDL3 modernization with gamepad support, render scaling, display presets, and Flatpak
+            packaging, aimed at current hardware while staying mod-compatible.</li>
+        </ul>
 
-  <h2>Platforms</h2>
-  <ul>
-    <li>64-bit Linux / SDL3 — OpenGL 4.3 (Nix, Flatpak, tarball)</li>
-    <li>64-bit Windows / SDL3 — OpenGL 4.3 (ZIP, cross-compiled from Nix)</li>
-    <li>Browser / WebAssembly — WebGL2, installable as a PWA on desktop, iOS and Android</li>
-  </ul>
+        <h2>What's in it</h2>
+        <div class="grid">
+          <div>
+            <h3>Rendering</h3>
+            <ul>
+              <li>Full GLSL 4.30 core pipeline — no immediate mode, no fixed-function</li>
+              <li>Reversed-Z depth for precision at distance</li>
+              <li>Lightmap atlas, batched world draws, instanced alias models</li>
+              <li>MSAA, FXAA, anisotropic filtering</li>
+              <li>Render scale (25–100%) and retro dithering</li>
+              <li>Display presets: Faithful, Crunchy, Retro, Clean, Modern, Ultra</li>
+              <li>HDR tonemap, shader-based fog, underwater warp and caustics</li>
+              <li>Interpolated animation decoupled from the 20&nbsp;Hz physics tick</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Input</h3>
+            <ul>
+              <li>WASD + mouselook defaults</li>
+              <li>Scancode bindings — works on AZERTY, Dvorak, and friends</li>
+              <li>Mouse-driven menus with hover, click, and scroll</li>
+              <li>Xbox / PlayStation / Nintendo gamepads with rumble and hot-plug</li>
+              <li>Type-to-search key bindings and options menus</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Mods</h3>
+            <ul>
+              <li>Runs <a href="https://www.moddb.com/mods/wheel-of-karma-a-tulku-odyssey">Wheel of Karma</a>
+                  and <a href="https://www.moddb.com/mods/storm-over-thyrion">Storm over Thyrion</a> out of the box</li>
+              <li>Protocols 18–21 with auto-detection</li>
+              <li>Scrollable Mods menu with per-mod config</li>
+              <li>MD3 models and external texture overrides (TGA/PNG/PCX)</li>
+              <li><a href="http://earthday.free.fr/Inkys-Hexen-II-Mapping-Corner/mapping-tricks-pimp.html">PimpModel</a>
+                  entity overrides, extended QuakeC builtins</li>
+              <li>Case-insensitive file lookups</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Audio</h3>
+            <ul>
+              <li>OGG Vorbis, Opus, MP3, FLAC and WAV music</li>
+              <li>Tracker music via libxmp (MOD/S3M/XM/IT)</li>
+              <li>MIDI via FluidSynth, or native Windows MIDI</li>
+              <li>Per-mod music folders and CD-track remapping</li>
+              <li>Underwater low-pass filter, 2048 sound channels</li>
+            </ul>
+          </div>
+        </div>
 
-  <footer>
-    Hexenwail is a fan project and is not affiliated with Raven Software or id Software.
-    Hexen II is a trademark of its respective owners.
-  </footer>
-</main>
+        <h2>Requirements</h2>
+        <p>
+          Hexenwail ships <em>no</em> game assets. A valid copy of Hexen II is required — available
+          from <a href="https://www.gog.com/en/game/hexen_ii">GOG</a>. You need
+          <code>data1/pak0.pak</code> and <code>data1/pak1.pak</code>; add
+          <code>portals/pak3.pak</code> for Portal of Praevus. To just try it, the
+          <a href="https://hexenwail.github.io/hexenwail/">browser build</a> can load the free
+          1997 demo instead, and the desktop releases ship a fetch helper for the same data.
+        </p>
+        <p>
+          Any GPU with OpenGL&nbsp;4.3 (2012 and later) will do. See
+          <a href="https://github.com/hexenwail/hexenwail/blob/master/USAGE.md">USAGE.md</a>
+          for external textures, Steam Deck setup, and mod configuration.
+        </p>
+
+        <h2>Platforms</h2>
+        <ul>
+          <li>64-bit Linux / SDL3 — OpenGL 4.3 (Nix, Flatpak, tarball)</li>
+          <li>64-bit Windows / SDL3 — OpenGL 4.3 (ZIP, cross-compiled from Nix)</li>
+          <li>Browser / WebAssembly — WebGL2, installable as a PWA on desktop, iOS and Android</li>
+        </ul>
+        <p>Flathub and AppImage packaging are planned.</p>
+
+        <h2>Lineage</h2>
+        <p class="lineage">
+          <strong>Hexen II</strong> — Raven Software, published by id Software (1997)<br>
+          → engine source open-sourced under the GPL (2000)<br>
+          → <strong>Anvil of Thyrion</strong> Linux port — Dan Olson &amp; Clément Bourdarias<br>
+          → <strong>Hammer of Thyrion / uHexen2</strong> — O. Sezer (2004–2018, final release 1.5.9)<br>
+          → <strong>Shanjaq's</strong> additions<br>
+          → <strong class="now">Hexenwail</strong> — a full GL 4.3 modernization
+        </p>
+        <p>
+          Hexenwail began when <a href="https://www.moddb.com/mods/storm-over-thyrion">Storm over
+          Thyrion</a> shipped without a buildable Linux client. The name is
+          <strong>Hexen</strong> + Iron<strong>wail</strong>.
+        </p>
+
+        <h2>Contributing</h2>
+        <p>
+          Bug reports, code cleanup, and documentation are all welcome.
+          <a href="https://github.com/hexenwail/hexenwail/issues/new/choose">File an issue</a> — the
+          forms ask for your <code>qconsole.log</code>, GPU, and driver, which is what makes a report
+          fixable. Building from source needs OpenGL&nbsp;4.3, SDL3, and a C compiler; see
+          <a href="https://github.com/hexenwail/hexenwail/blob/master/docs/COMPILE">docs/COMPILE</a>,
+          or use the <a href="https://github.com/hexenwail/hexenwail/blob/master/flake.nix">Nix flake</a>
+          for reproducible builds and Windows cross-compilation.
+        </p>
+      </div>
+    </main>
+    <footer class="site-foot">
+      <div class="wrap">
+        <p>
+          Hexenwail is GPL-2.0-or-later, built on
+          <a href="https://github.com/sezero/uhexen2">uHexen2 / Hammer of Thyrion</a> by O. Sezer and
+          contributors, and incorporates work from
+          <a href="https://github.com/andrei-drexler/ironwail">Ironwail</a>,
+          <a href="https://github.com/sezero/quakespasm">QuakeSpasm</a>, and
+          <a href="https://github.com/Shpoike/Quakespasm">QuakeSpasm-Spiked</a>.
+        </p>
+        <p>
+          A fan project, not affiliated with Raven Software or id Software.
+          Hexen and Quake are trademarks of their respective owners.
+        </p>
+      </div>
+    </footer>
+  </div>
+</div>
 </body>
 </html>
