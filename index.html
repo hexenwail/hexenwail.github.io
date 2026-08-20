@@ -26,6 +26,9 @@
          background: #3a2f1d; border: 1px solid #5a4a2d; border-radius: 6px;
          color: #f0e0c0; text-decoration: none; font-weight: 600; }
   .cta:hover { background: #4a3c25; }
+  .cta.play { background: #e8b25a; border-color: #f0c87a; color: #1a1610; }
+  .cta.play:hover { background: #f0c87a; }
+  .playnote { color: #9c8f74; font-size: .9rem; margin: .1rem 0 0; }
   code { background: #221c12; padding: .15rem .4rem; border-radius: 4px; color: #e8b25a; }
   footer { color: #6f6450; font-size: .85rem; margin-top: 3rem; }
 </style>
@@ -45,9 +48,14 @@
   </p>
 
   <p>
+    <a class="cta play" href="https://hexenwail.github.io/hexenwail/">&#9654;&nbsp; Play in your browser</a>
     <a class="cta" href="https://github.com/hexenwail/hexenwail/releases">Download</a>
     <a class="cta" href="https://github.com/hexenwail/hexenwail">Source on GitHub</a>
     <a class="cta" href="https://github.com/hexenwail/hexenwail/issues">Report a Bug</a>
+  </p>
+  <p class="playnote">
+    Nothing to install — the browser launcher fetches Raven's free 1997 three-level
+    demo, or imports your own <code>data1</code>. Plays offline after the first load.
   </p>
 
   <h2>Which version should I use?</h2>
@@ -63,13 +71,16 @@
     Hexenwail ships <em>no</em> game assets. A valid copy of Hexen II is required — available
     from <a href="https://www.gog.com/en/game/hexen_ii">GOG</a>. You need
     <code>data1/pak0.pak</code> and <code>data1/pak1.pak</code>; add
-    <code>portals/pak3.pak</code> for Portal of Praevus.
+    <code>portals/pak3.pak</code> for Portal of Praevus. To just try it, the
+    <a href="https://hexenwail.github.io/hexenwail/">browser build</a> can load the free
+    1997 demo instead, and the desktop releases ship a fetch helper for the same data.
   </p>
 
   <h2>Platforms</h2>
   <ul>
     <li>64-bit Linux / SDL3 — OpenGL 4.3 (Nix, Flatpak, tarball)</li>
     <li>64-bit Windows / SDL3 — OpenGL 4.3 (ZIP, cross-compiled from Nix)</li>
+    <li>Browser / WebAssembly — WebGL2, installable as a PWA on desktop, iOS and Android</li>
   </ul>
 
   <footer>
